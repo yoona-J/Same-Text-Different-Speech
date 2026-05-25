@@ -1,0 +1,7 @@
+Region,n,CER (Baseline),CER (Model8),ΔCER,Hall. (Baseline),Hall. (Model8),ΔHall.,Pred/GT (Baseline),Pred/GT (Model8),ΔPred/GT,Failure (Baseline),Failure (Model8)
+Jeju,76,8.176,0.101,-8.075,0.105,0.0,-0.105,9.85,1.0,-8.85,Repetition,None
+Metropolitan,2081,2.523,0.1,-2.423,0.056,0.001,-0.055,3.47,0.99,-2.48,Insertion,Repetition
+Jeolla,540,2.135,0.138,-1.997,0.05,0.002,-0.048,3.01,0.98,-2.03,Insertion,Repetition
+Chungcheong,450,1.756,0.089,-1.667,0.06,0.002,-0.058,2.44,0.99,-1.45,Insertion,Repetition
+Gyeongsang,966,1.113,0.079,-1.034,0.036,0.003,-0.033,2.1,1.0,-1.1,Insertion,Repetition
+Gangwon,131,0.366,0.068,-0.298,0.023,0.0,-0.023,1.14,0.99,-0.15,Insertion,None

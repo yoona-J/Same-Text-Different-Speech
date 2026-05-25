@@ -1,0 +1,24 @@
+# ESPnet ASR large artifacts
+espnet_asr/recipe/asr1/dump/
+espnet_asr/recipe/asr1/downloads/
+
+espnet_asr/recipe/asr1/exp/**/valid.*.pth
+espnet_asr/recipe/asr1/exp/**/*.pth
+espnet_asr/recipe/asr1/exp/**/*.pt
+espnet_asr/recipe/asr1/exp/**/tensorboard/
+espnet_asr/recipe/asr1/exp/**/images/
+
+espnet_asr/recipe/asr1/logs/
+espnet_asr/recipe/asr1/*.log
+
+# Model / feature / audio artifacts
+*.pth
+*.pt
+*.ckpt
+*.ark
+*.scp.tmp
+*.npy
+*.npz
+*.wav
+*.flac
+*.mp3

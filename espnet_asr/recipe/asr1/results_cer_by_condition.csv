@@ -1,0 +1,10 @@
+model,normal (n=863),low_info_total (n=137),L-A_dur≤2+tok>2 (n=17),L-B_dur≤2+tok≤2 (n=111),L-C_dur>2+tok≤2 (n=9)
+Whisper Small,16.8,45.7,18.8,52.7,10.4
+Whisper Medium,15.2,52.2,23.4,60.0,10.8
+BiLSTM+CTC,60.7,60.7,47.1,62.5,63.7
+Conformer+CTC,59.2,63.1,42.0,66.0,67.1
+Transformer+CTC,14.9,16.8,9.1,18.5,9.6
+E-Branchformer+CTC,11.7,14.8,6.7,16.7,7.6
+E-Branchformer+CTC+Dec(ep30),7.3,13.0,6.9,14.9,1.4
+Acous+E-Branchformer+CTC+Dec(ep30),6.3,10.3,2.5,12.0,4.2
+Acous+E-Branchformer+CTC,12.3,19.1,6.7,21.8,8.6
