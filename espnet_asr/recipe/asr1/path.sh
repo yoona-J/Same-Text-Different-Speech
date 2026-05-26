@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-export ESPNET_ROOT=/home/user/Documents/yoona/dialect/espnet
-export RECIPE_ROOT=/home/user/Documents/yoona/dialect/espnet_asr/recipe/asr1
+export ESPNET_ROOT=/home/user/Documents/your_root/dialect/espnet
+export RECIPE_ROOT=/home/user/Documents/your_root/dialect/espnet_asr/recipe/asr1
 
 export PATH=${RECIPE_ROOT}/utils:${RECIPE_ROOT}/utils/parallel:${PATH}
 export PATH=${ESPNET_ROOT}/tools:${ESPNET_ROOT}/utils:${PATH}

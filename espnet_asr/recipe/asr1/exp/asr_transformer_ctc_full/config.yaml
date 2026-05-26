@@ -32,7 +32,7 @@ use_tf32: false
 collect_stats: false
 write_collected_feats: false
 max_epoch: 30
-patience: 5
+patience: 3
 val_scheduler_criterion:
 - valid
 - loss
@@ -2215,7 +2215,7 @@ model_conf:
     lsm_weight: 0.0
 preencoder: null
 preencoder_conf: {}
-encoder: conformer
+encoder: transformer
 encoder_conf:
     output_size: 192
     attention_heads: 4
@@ -2226,13 +2226,7 @@ encoder_conf:
     attention_dropout_rate: 0.1
     input_layer: conv2d
     normalize_before: true
-    macaron_style: true
-    rel_pos_type: latest
-    pos_enc_layer_type: rel_pos
-    selfattention_layer_type: rel_selfattn
-    activation_type: swish
-    use_cnn_module: true
-    cnn_module_kernel: 15
+    pos_enc_layer_type: abs_pos
 postencoder: null
 postencoder_conf: {}
 decoder: null
