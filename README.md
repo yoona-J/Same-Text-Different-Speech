@@ -1,312 +1,310 @@
-# When the Same Transcript Sounds Different
+# Same-Transcript-Sounds-Different
 
-Official repository for:
+# When the Same Transcript Sounds Different: Diagnosing and Mitigating Recognition Instability in Low-Information Conversational ASR
 
-**When the Same Transcript Sounds Different: Diagnosing and Mitigating Recognition Instability in Low-Information Conversational ASR**
-
-This repository provides code, experiment configurations, and analysis resources for diagnosing hallucination and recognition instability in low-information Korean conversational ASR and for reproducing the proposed Acoustic Conditioning framework.
-
-> Note  
-> This work uses Korean regional conversational speech data.  
-> While experiments are conducted in Korean, the proposed analysis framework targets a broader ASR failure mode in which limited lexical evidence increases sensitivity to acoustic/prosodic variation.
+This repository accompanies our study on recognition instability in Low-Information conversational speech and the proposed Acoustic Conditioning (AC) framework.
 
 ---
 
 # Overview
 
-Modern ASR systems achieve strong average performance, but spontaneous conversational speech still produces:
-
-- hallucination
-- unstable decoding
-- prediction inconsistency
-- robustness degradation under low-information speech
-
-This work introduces:
-
-- **Low-information speech**
-- **Same-transcript instability**
-- **Acoustic Conditioning**
-
-The proposed framework analyzes recognition instability caused by acoustic/prosodic variation and mitigates it using utterance-level acoustic representations injected into the encoder.
+Recent large-scale pretrained ASR models achieve strong average recognition performance, yet hallucination and recognition instability remain persistent in spontaneous conversational speech. We investigate low-information speech as a source of ASR instability, focusing on utterances with limited lexical evidence but substantial acoustic/prosodic variation. Through analyses of Korean regional conversational speech, we show that instability is particularly pronounced when sparse lexical content is distributed over longer acoustic durations, and that identical transcripts can yield diverse ASR predictions under different acoustic realizations. We define this phenomenon as same-transcript instability and analyze its acoustic correlates. To mitigate this failure mode, we propose a lightweight acoustic conditioning module that injects 11 utterance-level acoustic/prosodic features into encoder input representations. Under matched training conditions, acoustic conditioning improves an E-Branchformer hybrid CTC/attention baseline from 7.09\% to 6.00\% CER and reduces hallucination rate from 1.06\% to 0.73\% on the full test set. Additional same-transcript analyses show reduced prediction diversity and hallucination-like outputs, suggesting that acoustic conditioning can stabilize conversational ASR under low-information conditions.
 
 ---
 
-# Main Contributions
+# Our Main Contributions
 
-- Definition of low-information conversational speech
-- Introduction of same-transcript instability
-- Hallucination and instability analysis in Korean conversational ASR
-- Lightweight Acoustic Conditioning for ESPnet
-- Improved CER and hallucination under matched settings
+- We define Low-Information Speech as a lexical-acoustic sparsity condition linked to ASR hallucination and recognition instability.
+- We introduce same-transcript instability as a controlled diagnostic perspective for analyzing instability under identical lexical content.
+- We experimentally show that ASR instability is more strongly associated with lexical-acoustic sparsity and prosodic realization than with dialect region itself.
+- We propose a lightweight, analysis-motivated acoustic conditioning (AC) module that mitigates hallucination-like instability under low-information and same-transcript conditions.
 
 ---
 
 # Repository Structure
 
-```text
-Same-Text-Different-Speech/
-│
-├── README.md
-│
-├── espnet/
-│   └── espnet2/
-│       ├── asr/
-│       │   ├── acoustic_conditioning.py
-│       │   └── espnet_model.py
-│       └── bin/
-│           └── asr_inference.py
-│
-├── espnet_asr/
-│   └── recipe/
-│       └── asr1/
-│           ├── conf/
-│           ├── local/
-│           ├── scripts/
-│           ├── dump/
-│           ├── exp/
-│           ├── logs/
-│           ├── run_decode1.sh
-│           ├── run_decode2.sh
-│           ├── run_training.sh
+Main code repository: 
+
+`Same-Transcript-Sounds-Different/` Typical structure:
+
 ```
+conf/
+espnet2/
+local/
+scripts/
+utils/
+```
+
+The repository includes:
+
+- ESPnet-based ASR training/inference code
+- Acoustic Conditioning implementation
+- preprocessing and evaluation scripts
+- selected experiment configurations
+
+Large checkpoints may not be included.
 
 ---
 
-# Environment
+# Dataset Repositories
 
-| Component | Setting |
-|---|---|
-| GPU | NVIDIA RTX 4090 |
-| Framework | ESPnet / PyTorch |
-| PyTorch | 2.5+ |
-| Tokenization | Character-level Korean |
-| Acoustic Extraction | Parselmouth + librosa |
+Because of dataset size limitations, the corpus is distributed across multiple dataset repositories.
+
+## 1. Raw Speech Corpus (Baseline + AC)
+
+Dataset:
+
+`/raw` Contents:
+
+```
+raw/
+├── train
+├── dev
+├── test
+└── test_1k
+```
+
+Contains:
+
+- wav.scp
+- text
+- utt2spk
+- speaker metadata
+- FLAC audio
+
+Used by:
+
+- Encoder Baseline models
+- Encoder + decoder only models
 
 ---
 
-# Dataset
+## 2. Acoustic Conditioning Features (Main AC)
 
-The dataset is not directly included because of size constraints.
+Dataset:
 
-Expected ESPnet dump format: 
+`/hallu_acoustic_feats` Contents:
 
-```text
-dump/raw/
-├── train/
-├── dev/
-└── test/
+```
+hallu_acoustic_feats/
+├── train
+├── dev
+├── test
+└── test_1k
 ```
 
-Each split contains:
+Contains:
 
-```text
-wav.scp
-text
-utt2spk
-spk2utt
-```
+- acoustic_feats.scp
+- utterance-level acoustic features (.npy)
 
-Optional evaluation subset:
+Used by:
 
-```text
-dump/raw/test_1k/
-```
+- Acoustic Conditioning (main model)
 
 ---
 
-# Low-Information Definition
+## 3. Temporal Acoustic Features (Ablation)
 
-Low-information speech is defined as:
+Dataset:
 
-```text
-duration <= 2.0 sec
-OR
-token_count <= 2
-```
+`/hallu_acoustic_feats_temporal` Used for:
 
-This reflects Korean conversational utterances with limited lexical information.
+- Ablation experiments only
+- Contains temporal acoustic features.
 
----
-
-# Acoustic Features
-
-11 utterance-level acoustic/prosodic features are used:
-
-```text
-f0_std
-f0_range
-token_per_sec
-duration_per_token
-silence_ratio
-num_pauses
-mean_pause
-rms_energy
-hnr_mean
-jitter_local
-shimmer_local
-```
-
-These features are projected through an MLP and injected into encoder representations through gated residual conditioning.
+Note: `test_1k` references test/norm features via relative paths.
 
 ---
 
-# ESPnet Source Modifications
+## 4. Voice Quality Features (Ablation)
 
-The proposed framework modifies original ESPnet source code.
+Dataset:
 
-Modified files:
+`/hallu_acoustic_feats_voice` Used for:
 
-```text
-espnet/espnet2/asr/acoustic_conditioning.py
-espnet/espnet2/asr/espnet_model.py
-espnet/espnet2/bin/asr_inference.py
-```
+- Ablation experiments only
+- Contains voice-quality feature variants.
 
-## acoustic_conditioning.py
-
-Purpose:
-
-- Implements Acoustic Conditioning module
-- Projects acoustic features
-- Computes conditioning vector
-- Applies gated residual conditioning
-
-Role:
-
-```text
-acoustic_feat
-        ↓
-MLP projection
-        ↓
-sigmoid gate
-        ↓
-encoder input conditioning
-```
+Note: `test_1k` references test/norm features via relative paths.
 
 ---
 
-## espnet_model.py
+# Dataset Statistics
 
-Purpose:
+After preprocessing and filtering:
 
-- Adds acoustic feature support into ESPnet ASR model
-- Receives `acoustic_feat`
-- Passes conditioned representation into encoder
+| Split | Utterances | Ratio |
+|---|---:|---:|
+| Train | 1,283,280 | 69.6% |
+| Validation | 179,058 | 9.7% |
+| Test | 381,816 | 20.7% |
+| Total | 1,844,154 | 100% |
 
-Main modification:
+Test subset:
 
-```text
-speech + acoustic conditioning
-            ↓
-encoder
-```
+| Category | Count |
+|---|---:|
+| Low-Information | 121,705 |
+| Normal | 260,111 |
 
----
+Corpus coverage:
 
-## asr_inference.py
+- 4,511 speakers
+- multiple Korean regional varieties
+- 635 same-transcript groups
+- 12,605 same-transcript utterances
 
-Purpose:
-
-- Extends Speech2Text inference
-- Allows decoding with:
-
-```text
-acoustic_feat,npy
-```
-
-Without this modification, inference cannot receive Acoustic Conditioning inputs.
+The corpus is limited to Korean conversational speech but provides broad regional and acoustic diversity suitable for studying recognition instability.
 
 ---
 
-# Reproduction Pipeline
+# Low-Information Speech
 
-Move to recipe:
+We define Low-Information Speech using: `duration ≤ 2 sec OR token count ≤ 2`
 
-```bash
-cd espnet_asr/recipe/asr1
-. ./path.sh
-```
+This definition captures:
+
+- short utterances
+- fillers
+- hesitation
+- elongated speech
+- lexically sparse conversational speech
+
+<figure1>
 
 ---
 
-# Step 1. Baseline Encoder Training
+# Acoustic Conditioning
 
-Train baseline encoders:
+The proposed framework combines:
 
-```bash
-./run_training.sh
-```
+<figure5>
 
-These scripts launch:
+Acoustic Conditioning injects:
 
-- Conformer
+- F0 std
+- F0 range
+- token/sec
+- duration/token
+- silence ratio
+- number of pauses
+- mean pause duration
+- RMS energy
+- HNR
+- jitter
+- shimmer
+
+via residual conditioning and gating.
+
+---
+
+# Experimental Results
+
+Primary comparison:
+
+| Model | CER | Hall. |
+|---|---:|---:|
+| E-Branch + Dec | 7.09% | 1.06% |
+| AC + E-Branch + Dec | **6.00%** | **0.73%** |
+
+Acoustic Conditioning reduced:
+
+- CER
+- Weighted-CER
+- hallucination rate
+- same-transcript prediction diversity
+
+---
+
+# Training and Reproducibility
+
+## Baseline Models
+
+The repository provides baseline training and decoding scripts for:
+
+- BiLSTM
 - Transformer
+- Conformer
 - E-Branchformer
-- Bi-LSTM
 
-training experiments.
+Training: `./run_training.sh`
 
----
+Test decoding: `./run_decode1.sh`, `./run_decode2.sh`
 
-# Step 2. Acoustic Feature Extraction
-
-Extract acoustic features from raw ESPnet data.
-
-Script:
-
-```text
-local/extract_hallu_acoustic_features.py
-```
-
-Purpose:
-
-- Reads wav.scp
-- Reads transcript text
-- Computes utterance-level acoustic features
-- Saves normalized numpy features
-
-Command:
-
-```bash
-python local/extract_hallu_acoustic_features.py \
---train_wav_scp dump/raw/train/wav.scp \
---train_text dump/raw/train/text \
---dev_wav_scp dump/raw/dev/wav.scp \
---dev_text dump/raw/dev/text \
---test_wav_scp dump/raw/test/wav.scp \
---test_text dump/raw/test/text \
---out_root dump/hallu_acoustic_feats
-```
-
-Output:
-
-```text
-dump/hallu_acoustic_feats/
-├── acoustic_stats.json
-├── train/acoustic_feats.scp
-├── dev/acoustic_feats.scp
-└── test/acoustic_feats.scp
-```
-
-For 1k evaluation:
-
-```text
-local/extract_hallu_acoustic_test_only.py
-```
-
-```text
-dump/hallu_acoustic_feats/test_1k/
-```
+Baseline models use: `/raw` dataset only.
 
 ---
 
-# Step 3. Collect Statistics
+# E-Branchformer + Transformer Decoder
 
-Example:
+Uses: `/raw` dataset only.
 
-Acoustic Conditioning + E‑Branchformer + Transformer Decoder
+Training: 
 
-```bash
+```
+CUDA_VISIBLE_DEVICES=1 ./asr.sh \
+  --stage 11 \
+  --stop_stage 11 \
+  --ngpu 1 \
+  --use_lm false \
+  --use_word_lm false \
+  --token_type char \
+  --train_set train \
+  --valid_set dev \
+  --test_sets test \
+  --asr_config conf/tuning/train_asr_ebranchformer_fix_hybrid.yaml \
+  --asr_tag ebranchformer_fix_hybrid \
+  2>&1 | tee logs/train_ebranchformer_fix_hybrid_$(date +%Y%m%d_%H%M%S).log
+```
+
+Test:
+
+```
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+CUDA_VISIBLE_DEVICES=1 python3 -m espnet2.bin.asr_inference \
+--batch_size 1 \
+--ngpu 1 \
+--data_path_and_name_and_type dump/raw/test/wav.scp,speech,sound \
+--key_file dump/raw/test/keys.txt \
+--asr_train_config exp/asr_ebranchformer_fix_hybrid/config.yaml \
+--asr_model_file exp/asr_ebranchformer_fix_hybrid/valid.loss.best.pth \
+--ctc_weight 0.3 \
+--beam_size 5 \
+--maxlenratio 1.0 \
+--output_dir exp/asr_ebranchformer_fix_hybrid/direct_gpu_test \
+2>&1 | tee logs/decode_ebranchformer_fix_hybrid_$(date +%Y%m%d_%H%M%S).log
+```
+
+1k Subset Test:
+
+```
+CUDA_VISIBLE_DEVICES=1 python3 -m espnet2.bin.asr_inference \
+--batch_size 1 \
+--ngpu 1 \
+--data_path_and_name_and_type dump/raw/test_1k/wav.scp,speech,sound \
+--key_file dump/raw/test_1k/keys.txt \
+--asr_train_config exp/asr_ebranchformer_fix_hybrid/config.yaml \
+--asr_model_file exp/asr_ebranchformer_fix_hybrid/valid.loss.best.pth \
+--ctc_weight 0.3 \
+--beam_size 5 \
+--maxlenratio 1.0 \
+--output_dir exp/asr_ebranchformer_hybrid/direct_gpu_test1k \
+2>&1 | tee logs/decode_ebranchformer_fix_hybrid_test1k_$(date +%Y%m%d_%H%M%S).log
+```
+
+Note: If you want to Test of Training, make sure move the dataset in `/espnet_asr/recipe/asr1/dump` (ex. `/espnet_asr/recipe/asr1/dump/raw`)
+
+
+---
+
+# Acoustic Conditioning + E-Branchformer + CTC only
+
+Uses: `/hallu_acoustic_feats` dataset only.
+
+Collect stats:
+
+```
 CUDA_VISIBLE_DEVICES=0 python3 -m espnet2.bin.asr_train \
   --collect_stats true \
   --allow_variable_data_keys true \
@@ -323,210 +321,170 @@ CUDA_VISIBLE_DEVICES=0 python3 -m espnet2.bin.asr_train \
   --valid_data_path_and_name_and_type dump/raw/dev/wav.scp,speech,sound \
   --valid_data_path_and_name_and_type dump/raw/dev/text,text,text \
   --valid_data_path_and_name_and_type dump/hallu_acoustic_feats/dev/acoustic_feats.scp,acoustic_feat,npy \
-  --config conf/tuning/train_asr_ebranchformer_hybrid_hallu.yaml \
-  --output_dir exp/asr_stats_ebranchformer_hybrid_hallu \
-  --ngpu 1
-```
-
----
-
-# Step 4. Training
-
-## Baseline Hybrid
-
-E‑Branchformer + CTC + Transformer Decoder
-
-Training:
-
-```bash
-CUDA_VISIBLE_DEVICES=1 ./asr.sh \
-  --stage 11 \
-  --stop_stage 11 \
+  --config conf/tuning/train_asr_ebranchformer_fix_hybrid_hallu.yaml \
+  --output_dir exp/asr_stats_ebranchformer_fix_hybrid_hallu \
   --ngpu 1 \
-  --use_lm false \
-  --use_word_lm false \
+  2>&1 | tee logs/collect_stats_ebranchformer_fix_hybrid_hallu_$(date +%Y%m%d_%H%M%S).log
+```
+
+Training:
+
+```
+CUDA_VISIBLE_DEVICES=1 python3 -m espnet2.bin.asr_train \
+  --allow_variable_data_keys true \
+  --use_preprocessor true \
+  --bpemodel none \
   --token_type char \
-  --train_set train \
-  --valid_set dev \
-  --test_sets test \
-  --asr_config conf/tuning/train_asr_ebranchformer_hybrid.yaml \
-  --asr_tag ebranchformer_hybrid
+  --token_list data/token_list/char/tokens.txt \
+  --non_linguistic_symbols none \
+  --cleaner none \
+  --g2p none \
+  --train_data_path_and_name_and_type dump/raw/train/wav.scp,speech,sound \
+  --train_data_path_and_name_and_type dump/raw/train/text,text,text \
+  --train_data_path_and_name_and_type dump/hallu_acoustic_feats/train/acoustic_feats.scp,acoustic_feat,npy \
+  --valid_data_path_and_name_and_type dump/raw/dev/wav.scp,speech,sound \
+  --valid_data_path_and_name_and_type dump/raw/dev/text,text,text \
+  --valid_data_path_and_name_and_type dump/hallu_acoustic_feats/dev/acoustic_feats.scp,acoustic_feat,npy \
+  --train_shape_file exp/asr_stats_ebranchformer_fix_hybrid_hallu/train/speech_shape \
+  --train_shape_file exp/asr_stats_ebranchformer_fix_hybrid_hallu/train/text_shape \
+  --train_shape_file exp/asr_stats_ebranchformer_fix_hybrid_hallu/train/acoustic_feat_shape \
+  --valid_shape_file exp/asr_stats_ebranchformer_fix_hybrid_hallu/valid/speech_shape \
+  --valid_shape_file exp/asr_stats_ebranchformer_fix_hybrid_hallu/valid/text_shape \
+  --valid_shape_file exp/asr_stats_ebranchformer_fix_hybrid_hallu/valid/acoustic_feat_shape \
+  --config conf/tuning/train_asr_ebranchformer_fix_ctc_hallu.yaml \
+  --output_dir exp/asr_ebranchformer_fix_hallu \
+  --ngpu 1 \
+  2>&1 | tee logs/train_ebranchformer_fix_hallu_$(date +%Y%m%d_%H%M%S).log
 ```
+
+Test:
+
+```
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+CUDA_VISIBLE_DEVICES=1 python3 -m espnet2.bin.asr_inference \
+--allow_variable_data_keys true \
+--batch_size 1 \
+--ngpu 1 \
+--data_path_and_name_and_type dump/raw/test/wav.scp,speech,sound \
+--data_path_and_name_and_type dump/hallu_acoustic_feats/test/acoustic_feats.scp,acoustic_feat,npy \
+--key_file dump/raw/test/keys.txt \
+--asr_train_config exp/asr_ebranchformer_fix_hallu/config.yaml \
+--asr_model_file exp/asr_ebranchformer_fix_hallu/valid.acc.ave.pth \
+--beam_size 1 \
+--ctc_weight 1.0 \
+--maxlenratio 1.0 \
+--output_dir exp/asr_ebranchformer_fix_hallu/direct_gpu_test \
+2>&1 | tee logs/asr_ebranchformer_fix_hallu$(date +%Y%m%d_%H%M%S).log
+```
+
+1k Subset Test:
+
+```
+CUDA_VISIBLE_DEVICES=1 python3 -m espnet2.bin.asr_inference \
+--allow_variable_data_keys true \
+--batch_size 1 \
+--ngpu 1 \
+--data_path_and_name_and_type dump/raw/test_1k/wav.scp,speech,sound \
+--data_path_and_name_and_type dump/hallu_acoustic_feats/test_1k/acoustic_feats.scp,acoustic_feat,npy \
+--key_file dump/raw/test_1k/keys.txt \
+--asr_train_config exp/asr_ebranchformer_fix_hallu/config.yaml \
+--asr_model_file exp/asr_ebranchformer_fix_hallu/valid.loss.best.pth \
+--ctc_weight 1.0 \
+--beam_size 1 \
+--maxlenratio 1.0 \
+--output_dir exp/asr_ebranchformer_fix_hallu/direct_gpu_test1k \
+2>&1 | tee logs/asr_ebranchformer_fix_hallu_1k_$(date +%Y%m%d_%H%M%S).log
+```
+
+Note: If you want to Test of Training, make sure move the dataset in `/espnet_asr/recipe/asr1/dump` (ex. `/espnet_asr/recipe/asr1/dump/hallu_acoustic_feats`)
 
 ---
 
-## Acoustic Conditioning + CTC-only
+# Acoustic Conditioning + E-Branchformer + Transformer Decoder
+
+Uses: `/hallu_acoustic_feats`
 
 Training:
 
-```bash
-CUDA_VISIBLE_DEVICES=1 python3 -m espnet2.bin.asr_train ...
+```
+CUDA_VISIBLE_DEVICES=0 python3 -m espnet2.bin.asr_train \
+--allow_variable_data_keys true \
+--use_preprocessor true \
+--bpemodel none \
+--token_type char \
+--token_list data/token_list/char/tokens.txt \
+--non_linguistic_symbols none \
+--cleaner none \
+--g2p none \
+--train_data_path_and_name_and_type dump/raw/train/wav.scp,speech,sound \
+--train_data_path_and_name_and_type dump/raw/train/text,text,text \
+--train_data_path_and_name_and_type dump/hallu_acoustic_feats/train/acoustic_feats.scp,acoustic_feat,npy \
+--valid_data_path_and_name_and_type dump/raw/dev/wav.scp,speech,sound \
+--valid_data_path_and_name_and_type dump/raw/dev/text,text,text \
+--valid_data_path_and_name_and_type dump/hallu_acoustic_feats/dev/acoustic_feats.scp,acoustic_feat,npy \
+--train_shape_file exp/asr_stats_ebranchformer_fix_hybrid_hallu/train/speech_shape \
+--train_shape_file exp/asr_stats_ebranchformer_fix_hybrid_hallu/train/text_shape \
+--train_shape_file exp/asr_stats_ebranchformer_fix_hybrid_hallu/train/acoustic_feat_shape \
+--valid_shape_file exp/asr_stats_ebranchformer_fix_hybrid_hallu/valid/speech_shape \
+--valid_shape_file exp/asr_stats_ebranchformer_fix_hybrid_hallu/valid/text_shape \
+--valid_shape_file exp/asr_stats_ebranchformer_fix_hybrid_hallu/valid/acoustic_feat_shape \
+--config conf/tuning/train_asr_ebranchformer_fix_hybrid_hallu.yaml \
+--output_dir exp/asr_ebranchformer_fix_hybrid_hallu \
+--ngpu 1 \
+2>&1 | tee logs/train_ebranchformer_fix_hybrid_hallu_$(date +%Y%m%d_%H%M%S).log
 ```
 
-Config:
+Test:
 
-```text
-train_asr_ebranchformer_ctc_hallu.yaml
+```
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+CUDA_VISIBLE_DEVICES=0 python3 -m espnet2.bin.asr_inference \
+--allow_variable_data_keys true \
+--batch_size 1 \
+--ngpu 1 \
+--data_path_and_name_and_type dump/raw/test/wav.scp,speech,sound \
+--data_path_and_name_and_type dump/hallu_acoustic_feats/test/acoustic_feats.scp,acoustic_feat,npy \
+--key_file dump/raw/test/keys.txt \
+--asr_train_config exp/asr_ebranchformer_fix_hybrid_hallu/config.yaml \
+--asr_model_file exp/asr_ebranchformer_fix_hybrid_hallu/valid.acc.ave.pth \
+--beam_size 5 \
+--ctc_weight 0.3 \
+--maxlenratio 1.0 \
+--output_dir exp/asr_ebranchformer_fix_hybrid_hallu/direct_gpu_test \
+2>&1 | tee logs/decode_ebranchformer_fix_hybrid_hallu_test_$(date +%Y%m%d_%H%M%S).log
 ```
 
----
+1k subset test:
 
-## Acoustic Conditioning + Hybrid
-
-Training:
-
-```bash
-CUDA_VISIBLE_DEVICES=0 python3 -m espnet2.bin.asr_train ...
+```
+CUDA_VISIBLE_DEVICES=0 python3 -m espnet2.bin.asr_inference \
+  --allow_variable_data_keys true \
+  --batch_size 1 \
+  --ngpu 1 \
+  --data_path_and_name_and_type dump/raw/test_1k/wav.scp,speech,sound \
+  --data_path_and_name_and_type dump/hallu_acoustic_feats/test_1k/acoustic_feats.scp,acoustic_feat,npy \
+  --key_file dump/raw/test_1k/keys.txt \
+  --asr_train_config exp/asr_ebranchformer_fix_hybrid_hallu/config.yaml \
+  --asr_model_file exp/asr_ebranchformer_fix_hybrid_hallu/valid.acc.ave.pth \
+  --beam_size 5 \
+  --ctc_weight 0.3 \
+  --maxlenratio 1.0 \
+  --output_dir exp/asr_ebranchformer_fix_hybrid_hallu/direct_gpu_test1k \
+  2>&1 | tee logs/asr_ebranchformer_fix_hybrid_hallu_test1k_$(date +%Y%m%d_%H%M%S).log
 ```
 
-Config:
+Note: If you want to Test of Training, make sure move the dataset in `/espnet_asr/recipe/asr1/dump` (ex. `/espnet_asr/recipe/asr1/dump/hallu_acoustic_feats`)
 
-```text
-train_asr_ebranchformer_hybrid_hallu.yaml
-```
 
 ---
 
-# Step 5. Decoding
+# test_1k Subset
 
-Prepare keys:
-
-```bash
-cut -d' ' -f1 dump/raw/test/wav.scp > dump/raw/test/keys.txt
-```
-
-Run scripts:
-
-```bash
-./run_decode_gpu0.sh
-./run_decode_gpu1.sh
-```
+`test_1k` is a 1,000-utterance sampled validation subset used for preliminary experiments and validation analyses reported in the paper.
 
 ---
 
-## Baseline Hybrid Decode
+# Limitations
 
-```bash
-CUDA_VISIBLE_DEVICES=1 python3 -m espnet2.bin.asr_inference ...
-```
+The present dataset is limited to Korean conversational speech. However, hallucination and recognition instability have also been reported across other languages and ASR systems, suggesting that the proposed framework and diagnostic setting may support future cross-lingual and cross-domain validation.
 
----
-
-## Acoustic Conditioning Hybrid Decode
-
-```bash
-CUDA_VISIBLE_DEVICES=0 python3 -m espnet2.bin.asr_inference ...
-```
-
----
-
-## Acoustic Conditioning CTC Decode
-
-```bash
-CUDA_VISIBLE_DEVICES=1 python3 -m espnet2.bin.asr_inference ...
-```
-
----
-
-# Script Descriptions
-
-## run_conformer_models.sh
-
-Purpose:
-
-- launches conformer experiments
-- manages training automation
-
----
-
-## run_transformer_ebranchformer_models.sh
-
-Purpose:
-
-- launches transformer and E‑Branchformer experiments
-- handles hybrid model training
-
----
-
-## run_decode_gpu0.sh / run_decode_gpu1.sh
-
-Purpose:
-
-- GPU-parallel decoding
-- automatic inference execution
-- experiment log generation
-
----
-
-## local/
-
-Contains:
-
-- preprocessing
-- feature extraction
-- analysis utilities
-
-Main script:
-
-```text
-extract_hallu_acoustic_features.py
-```
-
----
-
-## conf/
-
-Contains:
-
-- training configs
-- decoding configs
-- acoustic-conditioning configs
-
-Examples:
-
-```text
-train_asr_ebranchformer_hybrid.yaml
-train_asr_ebranchformer_ctc_hallu.yaml
-train_asr_ebranchformer_hybrid_hallu.yaml
-```
-
----
-
-## exp/
-
-Contains:
-
-- trained checkpoints
-- logs
-- averaged models
-- decoding outputs
-
----
-
-## logs/
-
-Contains:
-
-- training logs
-- decoding logs
-- collect-stats logs
-
----
-
-# Proposed Model
-
-```text
-Speech Features
-        │
-        ▼
-Acoustic Conditioning
-        │
-        ▼
-E‑Branchformer Encoder
-        ├── CTC branch
-        └── Transformer Decoder
-```
-
-No external LM is used unless explicitly configured.
-
----
