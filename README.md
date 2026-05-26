@@ -171,7 +171,10 @@ This definition captures:
 - elongated speech
 - lexically sparse conversational speech
 
-<figure1>
+<img width="3921" height="1591" alt="figure1" src="https://github.com/user-attachments/assets/27f846a0-7ac3-4734-ba35-d3d2ea7e4250" />
+- Examples of Recognition Instability under Low-Information Speech.
+<p align='center'>Figure 1. Examples of Recognition Instability under Low-Information Speech.</p>
+
 
 ---
 
@@ -179,7 +182,9 @@ This definition captures:
 
 The proposed framework combines:
 
-<figure5>
+<img width="5893" height="2117" alt="figure5" src="https://github.com/user-attachments/assets/ef31fd9b-8f26-4a50-8784-fe6e99ca68ba" />
+<p align='center'>Figure 5. Overall architecture of the proposed framework.</p>
+
 
 Acoustic Conditioning injects:
 
