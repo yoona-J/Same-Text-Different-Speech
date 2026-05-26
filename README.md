@@ -52,7 +52,7 @@ Because of dataset size limitations, the corpus is distributed across multiple d
 
 ## 1. Raw Speech Corpus (Baseline + AC)
 
-Dataset: [Raw Datasets](https://www.dropbox.com/scl/fo/mrs4moh4v6aylubxaaj3c/AHXp4P0NEil1SbJm1Lixkw8?rlkey=5j4qyzt3ziwa8i3nap8qyrsts&st=lkdnenaf&dl=1)
+Dataset: [Raw Datasets](10.5281/zenodo.20393732)
 
 `/raw` Contents:
 
@@ -81,7 +81,7 @@ Used by:
 
 ## 2. Acoustic Conditioning Features (Main AC)
 
-Dataset: [Acoustic Conditioning Features Datasets](https://www.dropbox.com/scl/fo/vtkltku8b6w5i82pgz90b/ABcflsM3k5EZQqIWHF4iW9Q?rlkey=14m8xrvtc9djjhdregfaoj53f&st=qjkw0yq1&dl=1)
+Dataset: [Acoustic Conditioning Features Datasets](10.5281/zenodo.20393732)
 
 `/hallu_acoustic_feats` Contents:
 
@@ -106,7 +106,7 @@ Used by:
 
 ## 3. Temporal Acoustic Features (Ablation)
 
-Dataset: [Temporal Acoustic Features Datasets](https://www.dropbox.com/scl/fo/mrs4moh4v6aylubxaaj3c/AHXp4P0NEil1SbJm1Lixkw8?rlkey=5j4qyzt3ziwa8i3nap8qyrsts&st=lkdnenaf&dl=1)
+Dataset: [Temporal Acoustic Features Datasets](10.5281/zenodo.20393732)
 
 `/hallu_acoustic_feats_temporal` Used for:
 
@@ -119,7 +119,7 @@ Note: `test_1k` references test/norm features via relative paths.
 
 ## 4. Voice Quality Features (Ablation)
 
-Dataset: [Voice Quality Features](https://www.dropbox.com/scl/fo/mrs4moh4v6aylubxaaj3c/AHXp4P0NEil1SbJm1Lixkw8?rlkey=5j4qyzt3ziwa8i3nap8qyrsts&st=lkdnenaf&dl=1)
+Dataset: [Voice Quality Features](10.5281/zenodo.20393732)
 
 `/hallu_acoustic_feats_voice` Used for:
 
