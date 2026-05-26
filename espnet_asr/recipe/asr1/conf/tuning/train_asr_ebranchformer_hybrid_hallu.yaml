@@ -30,7 +30,7 @@ model_conf:
   ctc_weight: 0.3
   lsm_weight: 0.1
   length_normalized_loss: false
-  # 추가 (Acoustic Conditioning )
+  # Add (Acoustic Conditioning )
   use_acoustic_conditioning: true
   acoustic_dim: 11
   acoustic_condition_hidden_dim: 128

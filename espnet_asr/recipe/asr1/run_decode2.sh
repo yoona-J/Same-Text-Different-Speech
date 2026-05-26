@@ -6,9 +6,9 @@ export LC_ALL=C
 
 mkdir -p logs
 
-# 전체 test key 생성
-# cut -d' ' -f1 dump/raw/test/wav.scp > dump/raw/test/keys.txt
-cut -d' ' -f1 dump/raw/test_1k/wav.scp > dump/raw/test_1k/keys.txt
+cut -d' ' -f1 dump/raw/test/wav.scp > dump/raw/test/keys.txt
+# if you want to make 1K test predict, please uncomment
+# cut -d' ' -f1 dump/raw/test_1k/wav.scp > dump/raw/test_1k/keys.txt
 
 run_decode () {
   GPU=$1
@@ -35,16 +35,17 @@ run_decode () {
     --num_workers 0 \
     --beam_size 1 \
     --ctc_weight 1.0 \
-    --data_path_and_name_and_type dump/raw/test_1k/wav.scp,speech,sound \
-    --key_file dump/raw/test_1k/keys.txt \
+    --data_path_and_name_and_type dump/raw/test/wav.scp,speech,sound \
+    --key_file dump/raw/test/keys.txt \
+    # if you want to make 1K test predict, please uncomment
+    # --data_path_and_name_and_type dump/raw/test_1k/wav.scp,speech,sound \
+    # --key_file dump/raw/test_1k/keys.txt \
     --asr_train_config "${EXP_DIR}/config.yaml" \
     --asr_model_file "${EXP_DIR}/${MODEL}" \
     --output_dir "${OUT_DIR}" \
     2>&1 | tee "${LOG_FILE}"
 }
 
-# GPU 1에서 순차 실행
-run_decode 1 transformer_ctc_full_fix valid.acc.ave.pth
-# run_decode 1 ebranchformer_ctc_full_fix valid.acc.ave.pth
-
-echo "DONE"
+# Sequential execution on GPU 0
+run_decode 0 bilstm_ctc_full valid.acc.ave.pth
+run_decode 0 conformer_ctc_full valid.acc.ave.pth
