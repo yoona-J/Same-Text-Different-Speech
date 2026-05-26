@@ -52,7 +52,7 @@ Because of dataset size limitations, the corpus is distributed across multiple d
 
 ## 1. Raw Speech Corpus (Baseline + AC)
 
-Dataset: [Raw Datasets](10.5281/zenodo.20393732)
+Dataset: [Raw Datasets](https://doi.org/10.5281/zenodo.20393731)
 
 `/raw` Contents:
 
@@ -81,7 +81,7 @@ Used by:
 
 ## 2. Acoustic Conditioning Features (Main AC)
 
-Dataset: [Acoustic Conditioning Features Datasets](10.5281/zenodo.20393732)
+Dataset: [Acoustic Conditioning Features Datasets](https://doi.org/10.5281/zenodo.20393731)
 
 `/hallu_acoustic_feats` Contents:
 
@@ -106,7 +106,7 @@ Used by:
 
 ## 3. Temporal Acoustic Features (Ablation)
 
-Dataset: [Temporal Acoustic Features Datasets](10.5281/zenodo.20393732)
+Dataset: [Temporal Acoustic Features Datasets](https://doi.org/10.5281/zenodo.20393731)
 
 `/hallu_acoustic_feats_temporal` Used for:
 
@@ -119,7 +119,7 @@ Note: `test_1k` references test/norm features via relative paths.
 
 ## 4. Voice Quality Features (Ablation)
 
-Dataset: [Voice Quality Features](10.5281/zenodo.20393732)
+Dataset: [Voice Quality Features](https://doi.org/10.5281/zenodo.20393731)
 
 `/hallu_acoustic_feats_voice` Used for:
 
